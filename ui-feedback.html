@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Export</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.3.0/github-markdown-dark.min.css">
+  <script>
+      window.MathJax = {
+          loader: { load: ['[tex]/ams', '[tex]/boldsymbol'] },
+          tex: {
+              inlineMath: [['$', '$'], ['\\(', '\\)']],
+              displayMath: [['$$', '$$'], ['\\[', '\\]']],
+              processEscapes: true,
+              packages: { '[+]': ['ams', 'boldsymbol'] }
+          }
+      };
+  </script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.5.2/abcjs-basic-min.js"></script>
+  <style>
+      html {
+          background-color: #0d1117;
+      }
+      body {
+          margin: 0;
+          background-color: #0d1117;
+          color: #c9d1d9;
+      }
+      .markdown-body {
+          box-sizing: border-box;
+          min-width: 200px;
+          max-width: 100%;
+          width: fit-content;
+          margin: 0 auto;
+          padding: 45px;
+          background-color: #0d1117;
+          color: #c9d1d9;
+      }
+      .markdown-body > p,
+      .markdown-body > ul,
+      .markdown-body > ol,
+      .markdown-body > blockquote,
+      .markdown-body > h1,
+      .markdown-body > h2,
+      .markdown-body > h3,
+      .markdown-body > h4,
+      .markdown-body > h5,
+      .markdown-body > h6,
+      .markdown-body > pre,
+      .markdown-body > table,
+      .markdown-body > details,
+      .markdown-body > dl,
+      .markdown-body > hr {
+          max-width: 980px;
+          margin-left: auto !important;
+          margin-right: auto !important;
+      }
+
+
+      /* Syntax Highlighting */
+      .hljs-doctag, .hljs-keyword, .hljs-template-tag, .hljs-template-variable, .hljs-type, .hljs-variable.language_ { color: #ff7b72; }
+      .hljs-title, .hljs-title.class_, .hljs-title.class_.inherited__, .hljs-title.function_ { color: #d2a8ff; }
+      .hljs-attr, .hljs-attribute, .hljs-literal, .hljs-meta, .hljs-number, .hljs-operator, .hljs-variable, .hljs-selector-attr, .hljs-selector-class, .hljs-selector-id { color: #79c0ff; }
+      .hljs-regexp, .hljs-string, .hljs-meta .hljs-string { color: #a5d6ff; }
+      .hljs-built_in, .hljs-symbol { color: #ffa657; }
+      .hljs-comment, .hljs-code, .hljs-formula { color: #8b949e; }
+      .hljs-name, .hljs-quote, .hljs-selector-tag, .hljs-selector-pseudo { color: #7ee787; }
+      .hljs-subst { color: #c9d1d9; }
+      .hljs-section { color: #1f6feb; font-weight: bold; }
+      .hljs-bullet { color: #79c0ff; }
+      .hljs-emphasis { font-style: italic; }
+      .hljs-strong { font-weight: bold; }
+      .hljs-addition { color: #aff5b4; background-color: #033a16; }
+      .hljs-deletion { color: #ffdcd7; background-color: #67060c; }
+
+      .markdown-alert {
+          padding: 0.5rem 1rem;
+          margin-bottom: 16px;
+          border-left: 0.25em solid;
+          border-radius: 0.375rem;
+      }
+      .markdown-alert > :last-child {
+          margin-bottom: 0;
+      }
+      .markdown-alert-title {
+          margin: 0 0 8px;
+          font-weight: 600;
+          line-height: 1.25;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+      }
+      .markdown-alert-icon {
+          display: inline-flex;
+          width: 16px;
+          height: 16px;
+      }
+      .markdown-alert-icon svg {
+          width: 16px;
+          height: 16px;
+          fill: currentColor;
+      }
+      .markdown-alert-note { color: #4493f8; border-left-color: #4493f8; background-color: rgba(31, 111, 235, 0.15); }
+      .markdown-alert-tip { color: #3fb950; border-left-color: #3fb950; background-color: rgba(35, 134, 54, 0.15); }
+      .markdown-alert-important { color: #ab7df8; border-left-color: #ab7df8; background-color: rgba(137, 87, 229, 0.15); }
+      .markdown-alert-warning { color: #d29922; border-left-color: #d29922; background-color: rgba(210, 153, 34, 0.18); }
+      .markdown-alert-caution { color: #f85149; border-left-color: #f85149; background-color: rgba(248, 81, 73, 0.18); }
+      .markdown-alert > *:not(.markdown-alert-title) { color: #c9d1d9; }
+
+      .frontmatter-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 24px;
+          font-size: 14px;
+      }
+      .frontmatter-table th,
+      .frontmatter-table td {
+          border: 1px solid #30363d;
+          padding: 8px 12px;
+          text-align: left;
+      }
+      .frontmatter-table th {
+          font-weight: 600;
+          background-color: #161b22;
+          width: 150px;
+      }
+
+      /* Footnote styles */
+      .footnotes {
+          margin-top: 1.5rem;
+          font-size: 0.9em;
+          border-top: 1px solid #30363d;
+          padding-top: 8px;
+      }
+      .footnotes ol {
+          padding-left: 1.5em;
+      }
+      .footnotes ol > li::marker {
+          content: "[" counter(list-item) "] ";
+          font-weight: 600;
+      }
+      .footnotes li > p {
+          margin: 0.2em 0;
+      }
+      .footnote-ref a,
+      .footnote-backref {
+          text-decoration: none;
+      }
+      .footnote-backref {
+          margin-left: 0.4em;
+      }
+      a.reference-link {
+          font-size: 0.75em;
+          letter-spacing: -0.02em;
+          line-height: 1;
+          vertical-align: super;
+          position: relative;
+          top: 0.08em;
+      }
+
+      /* Mermaid and Math styles */
+      .mermaid-container {
+          position: relative;
+          margin-bottom: 16px;
+      }
+      .math-block {
+          margin: 1em 0;
+          overflow-x: auto;
+          text-align: center;
+      }
+      .abc-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin: 1.5em 0;
+          padding: 1.25em;
+          background-color: #161b22;
+          border: 1px solid #30363d;
+          border-radius: 6px;
+          overflow-x: auto;
+      }
+      .abc-notation {
+          width: 100%;
+      }
+      .abc-notation svg {
+          background: transparent !important;
+          color: #c9d1d9 !important;
+          display: block;
+          margin: 0 auto;
+      }
+      .abc-notation svg path {
+          fill: currentColor;
+      }
+      .abc-notation svg text {
+          fill: currentColor !important;
+          stroke: none !important;
+      }
+      .abc-notation svg .abcjs-staff,
+      .abc-notation svg .abcjs-staff-extra,
+      .abc-notation svg .abcjs-bar,
+      .abc-notation svg .abcjs-ledger,
+      .abc-notation svg .abcjs-stem,
+      .abc-notation svg .abcjs-beam,
+      .abc-notation svg .abcjs-slur,
+      .abc-notation svg .abcjs-tie {
+          stroke: currentColor !important;
+      }
+      .abc-notation svg .abcjs-staff,
+      .abc-notation svg .abcjs-staff-extra,
+      .abc-notation svg .abcjs-ledger,
+      .abc-notation svg .abcjs-slur,
+      .abc-notation svg .abcjs-tie,
+      .abc-notation svg .abcjs-stem {
+          fill: none !important;
+      }
+      .abc-sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+      }
+
+      @media (max-width: 767px) {
+          .markdown-body {
+              padding: 15px;
+          }
+      }
+  </style>
+</head>
+<body>
+  <article class="markdown-body">
+      <h1 id="ui-feedback-plugin-team-integration-guide">UI Feedback Plugin — Team Integration Guide</h1><h2 id="what-is-this">What is this?</h2><p><code>@mindbowser_inc/ui-feedback-plugin</code> is an internal npm package that adds a floating feedback widget to any web prototype. It lets reviewers annotate the UI directly — drawing shapes, adding comments, attaching screenshots, and threading replies — without leaving the browser.</p>
+<p>Think of it as Figma comments, but embedded in our own web prototypes.</p>
+<p><strong>Why we built it instead of using a third-party tool:</strong></p>
+<ul>
+<li>Full control over where feedback data lives (our own database/storage, not a vendor's)</li>
+<li>Works on any web page with a single script tag or npm import</li>
+<li>No per-seat licensing cost</li>
+<li>Feedback data stays within our infrastructure</li>
+</ul>
+<hr>
+<h2 id="how-it-works">How it works</h2><pre><code class="hljs plaintext">Browser (prototype page)
+  └── &lt;ui-feedback-plugin&gt; (Web Component, Shadow DOM)
+        ├── Floating trigger button (draggable)
+        ├── Annotation overlay (draw rectangles, arrows, freehand)
+        ├── Screenshot capture (full-page, html2canvas)
+        └── Comments panel (threads, replies, resolve/reopen)
+              │
+              ▼
+        Backend adapter (lazy-loaded, ~12 KB base)
+              │
+    ┌─────────┴──────────┐
+    │                    │
+  Firebase           Supabase           AWS S3
+  (Firestore +       (Postgres +        (JSON files +
+  Firebase           Supabase           PNG files,
+  Storage)           Storage)           Cognito auth)</code></pre><p>Each backend is loaded as a separate chunk — only the one you configure is downloaded. Firebase and Supabase provide real-time updates; AWS uses polling (5-second default).</p>
+<hr>
+<h2 id="backend-options">Backend Options</h2><table>
+<thead>
+<tr>
+<th></th>
+<th>Firebase</th>
+<th>Supabase</th>
+<th>AWS (Cognito + S3)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Database</strong></td>
+<td>Firestore</td>
+<td>Postgres</td>
+<td>JSON files in S3</td>
+</tr>
+<tr>
+<td><strong>Screenshots</strong></td>
+<td>Firebase Storage</td>
+<td>Supabase Storage</td>
+<td>PNG files in S3</td>
+</tr>
+<tr>
+<td><strong>Real-time</strong></td>
+<td>Yes (WebSocket)</td>
+<td>Yes (WebSocket)</td>
+<td>Polling (5 s)</td>
+</tr>
+<tr>
+<td><strong>Auth model</strong></td>
+<td>Firebase SDK + Security Rules</td>
+<td>anon key + RLS policies</td>
+<td>Cognito Identity Pool (temp credentials)</td>
+</tr>
+<tr>
+<td><strong>Backend server needed</strong></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>Best for</strong></td>
+<td>Teams already on Firebase</td>
+<td>Teams already on Supabase</td>
+<td>Teams on AWS / no Supabase or Firebase</td>
+</tr>
+</tbody></table>
+<hr>
+<hr>
+<h1 id="devops-what-to-set-up">DEVOPS: What to Set Up</h1><p>Pick the backend that matches your infrastructure. Hand developers the values marked <strong>→ give to developers</strong> below.</p>
+<hr>
+<h2 id="option-a-firebase">Option A — Firebase</h2><h3 id="step-1-create-a-firebase-project">Step 1: Create a Firebase project</h3><ol>
+<li>Go to <a href="https://console.firebase.google.com">console.firebase.google.com</a></li>
+<li>Click <strong>Add project</strong> → name it (e.g. <code>mindbowser-feedback</code>)</li>
+<li>Disable Google Analytics (not needed) → <strong>Create project</strong></li>
+</ol>
+<h3 id="step-2-set-up-firestore">Step 2: Set up Firestore</h3><ol>
+<li>Left sidebar → <strong>Firestore Database</strong> → <strong>Create database</strong></li>
+<li>Select <strong>Start in production mode</strong> → choose a region → <strong>Enable</strong></li>
+<li>Go to <strong>Rules</strong> tab and replace the default rule:</li>
+</ol>
+<pre><code class="hljs js">rules_version = <span class="hljs-string">'2'</span>;
+service cloud.<span class="hljs-property">firestore</span> {
+  match /databases/{database}/documents {
+    match /ufp_comments/{doc} {
+      allow read, <span class="hljs-attr">write</span>: <span class="hljs-keyword">if</span> <span class="hljs-literal">true</span>;
+    }
+    match /ufp_replies/{doc} {
+      allow read, <span class="hljs-attr">write</span>: <span class="hljs-keyword">if</span> <span class="hljs-literal">true</span>;
+    }
+  }
+}</code></pre><blockquote>
+<p>For production, replace <code>if true</code> with an auth condition (e.g. <code>if request.auth != null</code>). For internal prototype review with known users, <code>if true</code> is acceptable.</p>
+</blockquote>
+<h3 id="step-3-set-up-firebase-storage">Step 3: Set up Firebase Storage</h3><ol>
+<li>Left sidebar → <strong>Storage</strong> → <strong>Get started</strong></li>
+<li>Accept default rules for now → choose same region → <strong>Done</strong></li>
+<li>Go to <strong>Rules</strong> tab and replace:</li>
+</ol>
+<pre><code class="hljs js">rules_version = <span class="hljs-string">'2'</span>;
+service firebase.<span class="hljs-property">storage</span> {
+  match /b/{bucket}/o {
+    match /ufp/{allPaths=**} {
+      allow read, <span class="hljs-attr">write</span>: <span class="hljs-keyword">if</span> <span class="hljs-literal">true</span>;
+    }
+  }
+}</code></pre><h3 id="step-4-get-the-web-config">Step 4: Get the web config</h3><ol>
+<li>Left sidebar → <strong>Project Settings</strong> (gear icon) → <strong>General</strong></li>
+<li>Scroll to <strong>Your apps</strong> → click <strong>Add app</strong> → choose Web (<code>&lt;/&gt;</code>)</li>
+<li>Register the app → copy the config object</li>
+</ol>
+<p><strong>→ Give developers these values:</strong></p>
+<pre><code class="hljs plaintext">FIREBASE_API_KEY=AIzaSy...
+FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+FIREBASE_PROJECT_ID=your-project
+FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+FIREBASE_MESSAGING_SENDER_ID=123456789
+FIREBASE_APP_ID=1:123456789:web:abc</code></pre><blockquote>
+<p>The Firebase API key is a <strong>public identifier</strong>, not a secret. It is safe to put in frontend code. Security is enforced by Firestore and Storage Rules, not by keeping the key secret.</p>
+</blockquote>
+<hr>
+<h2 id="option-b-supabase">Option B — Supabase</h2><h3 id="step-1-create-a-supabase-project">Step 1: Create a Supabase project</h3><ol>
+<li>Go to <a href="https://supabase.com">supabase.com</a> → <strong>New project</strong></li>
+<li>Choose an organisation, name, database password, and region → <strong>Create new project</strong></li>
+</ol>
+<h3 id="step-2-run-the-database-sql">Step 2: Run the database SQL</h3><p>Go to <strong>SQL Editor</strong> → click <strong>New query</strong> → paste and run:</p>
+<pre><code class="hljs sql"><span class="hljs-comment">-- Tables</span>
+<span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> if <span class="hljs-keyword">not</span> <span class="hljs-keyword">exists</span> ufp_comments (
+  id             uuid    <span class="hljs-keyword">primary</span> key <span class="hljs-keyword">default</span> gen_random_uuid(),
+  page_url       text    <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span>,
+  project_key    text    <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> <span class="hljs-keyword">default</span> <span class="hljs-string">'default'</span>,
+  author_name    text    <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span>,
+  text           text    <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span>,
+  screenshot_url text    <span class="hljs-keyword">default</span> <span class="hljs-string">''</span>,
+  annotation     jsonb   <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> <span class="hljs-keyword">default</span> <span class="hljs-string">'{}'</span>,
+  resolved       <span class="hljs-type">boolean</span> <span class="hljs-keyword">default</span> <span class="hljs-literal">false</span>,
+  created_at     <span class="hljs-type">bigint</span>  <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span>
+);
+
+<span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> if <span class="hljs-keyword">not</span> <span class="hljs-keyword">exists</span> ufp_replies (
+  id          uuid   <span class="hljs-keyword">primary</span> key <span class="hljs-keyword">default</span> gen_random_uuid(),
+  comment_id  uuid   <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> <span class="hljs-keyword">references</span> ufp_comments(id) <span class="hljs-keyword">on</span> <span class="hljs-keyword">delete</span> cascade,
+  author_name text   <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span>,
+  text        text   <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span>,
+  created_at  <span class="hljs-type">bigint</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span>
+);
+
+<span class="hljs-comment">-- Row Level Security (RLS)</span>
+<span class="hljs-keyword">alter</span> <span class="hljs-keyword">table</span> ufp_comments enable <span class="hljs-type">row</span> level security;
+<span class="hljs-keyword">alter</span> <span class="hljs-keyword">table</span> ufp_replies   enable <span class="hljs-type">row</span> level security;
+
+<span class="hljs-keyword">create</span> policy "ufp_comments_all" <span class="hljs-keyword">on</span> ufp_comments <span class="hljs-keyword">for</span> <span class="hljs-keyword">all</span> <span class="hljs-keyword">using</span> (<span class="hljs-literal">true</span>) <span class="hljs-keyword">with</span> <span class="hljs-keyword">check</span> (<span class="hljs-literal">true</span>);
+<span class="hljs-keyword">create</span> policy "ufp_replies_all"  <span class="hljs-keyword">on</span> ufp_replies  <span class="hljs-keyword">for</span> <span class="hljs-keyword">all</span> <span class="hljs-keyword">using</span> (<span class="hljs-literal">true</span>) <span class="hljs-keyword">with</span> <span class="hljs-keyword">check</span> (<span class="hljs-literal">true</span>);
+
+<span class="hljs-comment">-- Grants (RLS policies alone are not enough — table-level grants are also required)</span>
+<span class="hljs-keyword">grant</span> <span class="hljs-keyword">select</span>, <span class="hljs-keyword">insert</span>, <span class="hljs-keyword">update</span>, <span class="hljs-keyword">delete</span> <span class="hljs-keyword">on</span> ufp_comments <span class="hljs-keyword">to</span> anon;
+<span class="hljs-keyword">grant</span> <span class="hljs-keyword">select</span>, <span class="hljs-keyword">insert</span>, <span class="hljs-keyword">update</span>, <span class="hljs-keyword">delete</span> <span class="hljs-keyword">on</span> ufp_replies  <span class="hljs-keyword">to</span> anon;
+
+<span class="hljs-comment">-- Real-time (enables live comment updates)</span>
+<span class="hljs-keyword">alter</span> publication supabase_realtime <span class="hljs-keyword">add</span> <span class="hljs-keyword">table</span> ufp_comments;</code></pre><h3 id="step-3-create-the-storage-bucket">Step 3: Create the storage bucket</h3><ol>
+<li>Left sidebar → <strong>Storage</strong> → <strong>New bucket</strong></li>
+<li>Name: <code>ufp-screenshots</code></li>
+<li>Toggle <strong>Public bucket</strong> ON → <strong>Save</strong></li>
+<li>Go to <strong>Policies</strong> (inside Storage) → <strong>New policy</strong> → <strong>For full customization</strong></li>
+</ol>
+<p>Add these three policies for the <code>ufp-screenshots</code> bucket:</p>
+<pre><code class="hljs sql"><span class="hljs-comment">-- Allow uploads</span>
+<span class="hljs-keyword">create</span> policy "ufp_storage_insert" <span class="hljs-keyword">on</span> storage.objects
+  <span class="hljs-keyword">for</span> <span class="hljs-keyword">insert</span> <span class="hljs-keyword">to</span> anon <span class="hljs-keyword">with</span> <span class="hljs-keyword">check</span> (bucket_id <span class="hljs-operator">=</span> <span class="hljs-string">'ufp-screenshots'</span>);
+
+<span class="hljs-comment">-- Allow reads (needed to display screenshots)</span>
+<span class="hljs-keyword">create</span> policy "ufp_storage_select" <span class="hljs-keyword">on</span> storage.objects
+  <span class="hljs-keyword">for</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">to</span> anon <span class="hljs-keyword">using</span> (bucket_id <span class="hljs-operator">=</span> <span class="hljs-string">'ufp-screenshots'</span>);
+
+<span class="hljs-comment">-- Allow overwrites</span>
+<span class="hljs-keyword">create</span> policy "ufp_storage_update" <span class="hljs-keyword">on</span> storage.objects
+  <span class="hljs-keyword">for</span> <span class="hljs-keyword">update</span> <span class="hljs-keyword">to</span> anon <span class="hljs-keyword">using</span> (bucket_id <span class="hljs-operator">=</span> <span class="hljs-string">'ufp-screenshots'</span>);</code></pre><h3 id="step-4-get-the-api-keys">Step 4: Get the API keys</h3><p>Left sidebar → <strong>Project Settings</strong> → <strong>API</strong></p>
+<p><strong>→ Give developers these values:</strong></p>
+<pre><code class="hljs plaintext">SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_ANON_KEY=eyJhbGci...</code></pre><blockquote>
+<p>The <code>anon</code> key is a <strong>public key by design</strong> in Supabase. It's safe to include in frontend code. Security is enforced by Row Level Security policies, not by hiding the key.</p>
+</blockquote>
+<hr>
+<h2 id="option-c-aws-cognito-identity-pool-s3">Option C — AWS (Cognito Identity Pool + S3)</h2><p>This is the most infrastructure-heavy option but requires no third-party service. The browser obtains <strong>temporary, short-lived credentials</strong> from Cognito and talks to S3 directly — no backend server is needed, and no long-lived AWS keys ever reach the browser.</p>
+<h3 id="step-1-create-an-s3-bucket">Step 1: Create an S3 bucket</h3><ol>
+<li>Open <a href="https://s3.console.aws.amazon.com/s3">S3 console</a> → <strong>Create bucket</strong></li>
+<li>Choose a name (e.g. <code>mindbowser-ufp</code>) and region</li>
+<li>Keep <strong>Block all public access</strong> ON — you'll open only the screenshots prefix below</li>
+<li>Enable <strong>Versioning</strong> (recommended — allows recovery if a file is accidentally overwritten)</li>
+<li>Create the bucket</li>
+</ol>
+<h3 id="step-2-configure-cors-on-the-bucket">Step 2: Configure CORS on the bucket</h3><p>Go to bucket → <strong>Permissions</strong> → <strong>Cross-origin resource sharing (CORS)</strong> → <strong>Edit</strong> → paste:</p>
+<pre><code class="hljs json"><span class="hljs-punctuation">[</span>
+  <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">"AllowedOrigins"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">"https://your-prototype-domain.com"</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"AllowedMethods"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">"GET"</span><span class="hljs-punctuation">,</span> <span class="hljs-string">"PUT"</span><span class="hljs-punctuation">,</span> <span class="hljs-string">"HEAD"</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"AllowedHeaders"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">"*"</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"ExposeHeaders"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">"ETag"</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">"MaxAgeSeconds"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3000</span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">]</span></code></pre><blockquote>
+<p>Add each domain where the plugin will run to <code>AllowedOrigins</code>. Use <code>"*"</code> in a dev/staging environment if needed.</p>
+</blockquote>
+<h3 id="step-3-add-bucket-policy-public-read-for-screenshots-only">Step 3: Add bucket policy (public read for screenshots only)</h3><p>Go to bucket → <strong>Permissions</strong> → <strong>Bucket policy</strong> → <strong>Edit</strong> → paste (replace <code>YOUR_BUCKET</code>):</p>
+<pre><code class="hljs json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"Version"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2012-10-17"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"Statement"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">"Sid"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"PublicReadScreenshots"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Effect"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Allow"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Principal"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"*"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Action"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"s3:GetObject"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Resource"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"arn:aws:s3:::YOUR_BUCKET/ufp/*/screenshots/*"</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre><p>This makes only screenshot images publicly accessible (so they can render in <code>&lt;img&gt;</code> tags). All comment and reply JSON files remain private and are only accessible via Cognito credentials.</p>
+<h3 id="step-4-create-an-iam-policy">Step 4: Create an IAM policy</h3><p>Go to <strong>IAM</strong> → <strong>Policies</strong> → <strong>Create policy</strong> → <strong>JSON</strong> tab → paste (replace <code>YOUR_BUCKET</code>):</p>
+<pre><code class="hljs json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"Version"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"2012-10-17"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"Statement"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">"Sid"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"WriteJsonFiles"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Effect"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Allow"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Action"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"s3:PutObject"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Resource"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"arn:aws:s3:::YOUR_BUCKET/ufp/*"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Condition"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">"StringLike"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">"s3:RequestObjectKey"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+            <span class="hljs-string">"ufp/*/comments/*.json"</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-string">"ufp/replies/*/*.json"</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-string">"ufp/_index/*.json"</span>
+          <span class="hljs-punctuation">]</span>
+        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"NumericLessThanEquals"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">"s3:content-length"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"51200"</span>
+        <span class="hljs-punctuation">}</span>
+      <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">"Sid"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"WriteScreenshots"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Effect"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Allow"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Action"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"s3:PutObject"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Resource"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"arn:aws:s3:::YOUR_BUCKET/ufp/*"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Condition"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">"StringLike"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">"s3:RequestObjectKey"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"ufp/*/screenshots/*.png"</span>
+        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">"NumericLessThanEquals"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">"s3:content-length"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"3145728"</span>
+        <span class="hljs-punctuation">}</span>
+      <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">"Sid"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"ReadFiles"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Effect"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Allow"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Action"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"s3:GetObject"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Resource"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"arn:aws:s3:::YOUR_BUCKET/ufp/*"</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">{</span>
+      <span class="hljs-attr">"Sid"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"ListFiles"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Effect"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Allow"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Action"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"s3:ListBucket"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Resource"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"arn:aws:s3:::YOUR_BUCKET"</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">"Condition"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">"StringLike"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+          <span class="hljs-attr">"s3:prefix"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"ufp/*"</span>
+        <span class="hljs-punctuation">}</span>
+      <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre><p><strong>What this enforces (per CTO requirement):</strong></p>
+<ul>
+<li>Only <code>.json</code> and <code>.png</code> files can be written — no other file types</li>
+<li>JSON files capped at <strong>50 KB</strong> (comment data is never larger than a few KB)</li>
+<li>Screenshot files capped at <strong>3 MB</strong></li>
+<li>All access is restricted to the <code>ufp/</code> prefix — no other bucket paths are accessible</li>
+<li><strong><code>s3:DeleteObject</code> is intentionally absent</strong> — the plugin can never delete files. Deleted comments are soft-deleted (overwritten with a <code>deleted: true</code> flag). This provides an audit trail.</li>
+</ul>
+<p>Name the policy (e.g. <code>ufp-plugin-policy</code>) and save.</p>
+<h3 id="step-5-create-an-iam-role">Step 5: Create an IAM role</h3><ol>
+<li>Go to <strong>IAM</strong> → <strong>Roles</strong> → <strong>Create role</strong></li>
+<li>Trusted entity: <strong>Web identity</strong></li>
+<li>Identity provider: <strong>Amazon Cognito</strong></li>
+<li>Leave the audience/condition fields blank for now (Cognito sets these)</li>
+<li>Click <strong>Next</strong> → attach the policy from Step 4</li>
+<li>Name the role (e.g. <code>ufp-plugin-cognito-unauth</code>) → <strong>Create role</strong></li>
+</ol>
+<h3 id="step-6-create-a-cognito-identity-pool">Step 6: Create a Cognito Identity Pool</h3><ol>
+<li>Go to <strong>Amazon Cognito</strong> → <strong>Identity pools</strong> → <strong>Create identity pool</strong></li>
+<li>Under <strong>User access</strong>, check <strong>Guest access</strong> (unauthenticated identities)</li>
+<li>Under <strong>Guest role</strong>, choose <strong>Use an existing IAM role</strong> → select the role from Step 5</li>
+<li>Give the pool a name (e.g. <code>ufp-plugin-pool</code>) → <strong>Create</strong></li>
+<li>On the pool detail page, find and copy the <strong>Identity pool ID</strong> (format: <code>us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code>)</li>
+</ol>
+<h3 id="step-7-verify">Step 7: Verify</h3><p>Test that the bucket and Cognito pool are working before handing off to devs. You can do a quick sanity check using the <a href="https://docs.aws.amazon.com/cli/">AWS CLI</a>:</p>
+<pre><code class="hljs bash"><span class="hljs-comment"># Confirm the bucket exists</span>
+aws s3 <span class="hljs-built_in">ls</span> s3://your-bucket-name/ufp/ --region us-east-1</code></pre><p><strong>→ Give developers these values:</strong></p>
+<pre><code class="hljs plaintext">AWS_REGION=us-east-1
+AWS_BUCKET=your-bucket-name
+AWS_IDENTITY_POOL_ID=us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code></pre><blockquote>
+<p>These values are <strong>safe to include in frontend code</strong>. The Identity Pool ID is a public identifier — security is enforced by the IAM policy attached to the Cognito role, not by keeping the ID secret.</p>
+</blockquote>
+<hr>
+<hr>
+<h1 id="developers-how-to-integrate">DEVELOPERS: How to Integrate</h1><h2 id="installation">Installation</h2><pre><code class="hljs bash">npm install @mindbowser_inc/ui-feedback-plugin</code></pre><h2 id="basic-usage">Basic usage</h2><p>Call <code>initFeedbackPlugin</code> once on page load. Pass the credentials that DevOps provides.</p>
+<pre><code class="hljs js"><span class="hljs-keyword">import</span> { initFeedbackPlugin } <span class="hljs-keyword">from</span> <span class="hljs-string">'@mindbowser_inc/ui-feedback-plugin'</span>
+
+<span class="hljs-title function_">initFeedbackPlugin</span>({
+  <span class="hljs-attr">backend</span>: { <span class="hljs-comment">/* see examples below */</span> },
+  <span class="hljs-attr">projectKey</span>: <span class="hljs-string">'your-project-name'</span>,   <span class="hljs-comment">// namespaces comments — use the project/prototype name</span>
+  <span class="hljs-attr">position</span>: <span class="hljs-string">'bottom-right'</span>,          <span class="hljs-comment">// optional, default: 'bottom-right'</span>
+  <span class="hljs-attr">theme</span>: { <span class="hljs-attr">primaryColor</span>: <span class="hljs-string">'#6366f1'</span> } <span class="hljs-comment">// optional</span>
+})</code></pre><p><code>projectKey</code> keeps comments from different prototypes separate even if they share the same backend. Use a short, slug-like value (e.g. <code>'onboarding-v2'</code>, <code>'dashboard-redesign'</code>).</p>
+<hr>
+<h2 id="integrating-with-firebase">Integrating with Firebase</h2><p>DevOps will give you six values. Use them like this:</p>
+<pre><code class="hljs js"><span class="hljs-title function_">initFeedbackPlugin</span>({
+  <span class="hljs-attr">backend</span>: {
+    <span class="hljs-attr">provider</span>:          <span class="hljs-string">'firebase'</span>,
+    <span class="hljs-attr">apiKey</span>:            <span class="hljs-string">'AIzaSy...'</span>,
+    <span class="hljs-attr">authDomain</span>:        <span class="hljs-string">'your-project.firebaseapp.com'</span>,
+    <span class="hljs-attr">projectId</span>:         <span class="hljs-string">'your-project'</span>,
+    <span class="hljs-attr">storageBucket</span>:     <span class="hljs-string">'your-project.appspot.com'</span>,
+    <span class="hljs-attr">messagingSenderId</span>: <span class="hljs-string">'123456789'</span>,
+    <span class="hljs-attr">appId</span>:             <span class="hljs-string">'1:123456789:web:abc'</span>,
+  },
+  <span class="hljs-attr">projectKey</span>: <span class="hljs-string">'my-prototype'</span>,
+})</code></pre><p><strong>Storing credentials safely:</strong></p>
+<p>Never hard-code credentials in source files. Use environment variables:</p>
+<pre><code class="hljs bash"><span class="hljs-comment"># .env.local (gitignored)</span>
+VITE_FIREBASE_API_KEY=AIzaSy...
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=1:123456789:web:abc</code></pre><pre><code class="hljs js"><span class="hljs-comment">// In your code (Vite)</span>
+<span class="hljs-title function_">initFeedbackPlugin</span>({
+  <span class="hljs-attr">backend</span>: {
+    <span class="hljs-attr">provider</span>:          <span class="hljs-string">'firebase'</span>,
+    <span class="hljs-attr">apiKey</span>:            <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_FIREBASE_API_KEY</span>,
+    <span class="hljs-attr">authDomain</span>:        <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_FIREBASE_AUTH_DOMAIN</span>,
+    <span class="hljs-attr">projectId</span>:         <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_FIREBASE_PROJECT_ID</span>,
+    <span class="hljs-attr">storageBucket</span>:     <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_FIREBASE_STORAGE_BUCKET</span>,
+    <span class="hljs-attr">messagingSenderId</span>: <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_FIREBASE_MESSAGING_SENDER_ID</span>,
+    <span class="hljs-attr">appId</span>:             <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_FIREBASE_APP_ID</span>,
+  },
+  <span class="hljs-attr">projectKey</span>: <span class="hljs-string">'my-prototype'</span>,
+})</code></pre><pre><code class="hljs js"><span class="hljs-comment">// In your code (Create React App / Webpack)</span>
+<span class="hljs-title function_">initFeedbackPlugin</span>({
+  <span class="hljs-attr">backend</span>: {
+    <span class="hljs-attr">provider</span>:          <span class="hljs-string">'firebase'</span>,
+    <span class="hljs-attr">apiKey</span>:            process.<span class="hljs-property">env</span>.<span class="hljs-property">REACT_APP_FIREBASE_API_KEY</span>,
+    <span class="hljs-comment">// ... etc</span>
+  },
+})</code></pre><hr>
+<h2 id="integrating-with-supabase">Integrating with Supabase</h2><p>DevOps will give you two values. Use them like this:</p>
+<pre><code class="hljs js"><span class="hljs-title function_">initFeedbackPlugin</span>({
+  <span class="hljs-attr">backend</span>: {
+    <span class="hljs-attr">provider</span>: <span class="hljs-string">'supabase'</span>,
+    <span class="hljs-attr">url</span>:      <span class="hljs-string">'https://xxxx.supabase.co'</span>,
+    <span class="hljs-attr">anonKey</span>:  <span class="hljs-string">'eyJhbGci...'</span>,
+  },
+  <span class="hljs-attr">projectKey</span>: <span class="hljs-string">'my-prototype'</span>,
+})</code></pre><p><strong>With environment variables (recommended):</strong></p>
+<pre><code class="hljs bash"><span class="hljs-comment"># .env.local</span>
+VITE_SUPABASE_URL=https://xxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGci...</code></pre><pre><code class="hljs js"><span class="hljs-title function_">initFeedbackPlugin</span>({
+  <span class="hljs-attr">backend</span>: {
+    <span class="hljs-attr">provider</span>: <span class="hljs-string">'supabase'</span>,
+    <span class="hljs-attr">url</span>:      <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_SUPABASE_URL</span>,
+    <span class="hljs-attr">anonKey</span>:  <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_SUPABASE_ANON_KEY</span>,
+  },
+  <span class="hljs-attr">projectKey</span>: <span class="hljs-string">'my-prototype'</span>,
+})</code></pre><hr>
+<h2 id="integrating-with-aws">Integrating with AWS</h2><p>DevOps will give you three values. Use them like this:</p>
+<pre><code class="hljs js"><span class="hljs-title function_">initFeedbackPlugin</span>({
+  <span class="hljs-attr">backend</span>: {
+    <span class="hljs-attr">provider</span>:       <span class="hljs-string">'aws'</span>,
+    <span class="hljs-attr">region</span>:         <span class="hljs-string">'us-east-1'</span>,
+    <span class="hljs-attr">bucket</span>:         <span class="hljs-string">'your-bucket-name'</span>,
+    <span class="hljs-attr">identityPoolId</span>: <span class="hljs-string">'us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'</span>,
+  },
+  <span class="hljs-attr">projectKey</span>: <span class="hljs-string">'my-prototype'</span>,
+})</code></pre><p><strong>With environment variables (recommended):</strong></p>
+<pre><code class="hljs bash"><span class="hljs-comment"># .env.local</span>
+VITE_AWS_REGION=us-east-1
+VITE_AWS_BUCKET=your-bucket-name
+VITE_AWS_IDENTITY_POOL_ID=us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code></pre><pre><code class="hljs js"><span class="hljs-title function_">initFeedbackPlugin</span>({
+  <span class="hljs-attr">backend</span>: {
+    <span class="hljs-attr">provider</span>:       <span class="hljs-string">'aws'</span>,
+    <span class="hljs-attr">region</span>:         <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_AWS_REGION</span>,
+    <span class="hljs-attr">bucket</span>:         <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_AWS_BUCKET</span>,
+    <span class="hljs-attr">identityPoolId</span>: <span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_AWS_IDENTITY_POOL_ID</span>,
+  },
+  <span class="hljs-attr">projectKey</span>: <span class="hljs-string">'my-prototype'</span>,
+})</code></pre><blockquote>
+<p>Note: Comments from other users appear within 5 seconds (polling). There is no real-time WebSocket connection for the AWS backend.</p>
+</blockquote>
+<hr>
+<h2 id="plain-html-no-bundler">Plain HTML (no bundler)</h2><p>If you are not using a build tool, load the plugin from a CDN:</p>
+<pre><code class="hljs html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>...<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+  <span class="hljs-comment">&lt;!-- your prototype content --&gt;</span>
+
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/@mindbowser_inc/ui-feedback-plugin/dist/ui-feedback-plugin.umd.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript">
+    <span class="hljs-title class_">UIFeedbackPlugin</span>.<span class="hljs-title function_">initFeedbackPlugin</span>({
+      <span class="hljs-attr">backend</span>: {
+        <span class="hljs-attr">provider</span>: <span class="hljs-string">'supabase'</span>,
+        <span class="hljs-attr">url</span>:      <span class="hljs-string">'https://xxxx.supabase.co'</span>,
+        <span class="hljs-attr">anonKey</span>:  <span class="hljs-string">'eyJhbGci...'</span>,
+      },
+      <span class="hljs-attr">projectKey</span>: <span class="hljs-string">'my-prototype'</span>,
+    })
+  </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></code></pre><p>Replace the <code>backend</code> block with whichever provider DevOps has configured.</p>
+<hr>
+<h2 id="all-configuration-options">All configuration options</h2><pre><code class="hljs ts"><span class="hljs-title function_">initFeedbackPlugin</span>({
+  <span class="hljs-comment">// Required — choose one backend</span>
+  <span class="hljs-attr">backend</span>: <span class="hljs-title class_">FirebaseConfig</span> | <span class="hljs-title class_">SupabaseConfig</span> | <span class="hljs-title class_">AWSConfig</span>,
+
+  <span class="hljs-comment">// Optional — namespace comments per prototype (default: 'default')</span>
+  <span class="hljs-comment">// Use a short slug: 'dashboard-v2', 'onboarding-flow', etc.</span>
+  projectKey?: <span class="hljs-built_in">string</span>,
+
+  <span class="hljs-comment">// Optional — where the trigger button appears (default: 'bottom-right')</span>
+  position?: <span class="hljs-string">'bottom-right'</span> | <span class="hljs-string">'bottom-left'</span> | <span class="hljs-string">'top-right'</span> | <span class="hljs-string">'top-left'</span>,
+
+  <span class="hljs-comment">// Optional — accent color for the widget UI (default: '#6366f1' indigo)</span>
+  theme?: { primaryColor?: <span class="hljs-built_in">string</span> },
+})</code></pre><hr>
+<h2 id="credential-checklist-for-developers">Credential checklist for developers</h2><p>Before going live, confirm:</p>
+<ul>
+<li><input type="checkbox" disabled=""> Credentials are in <code>.env.local</code> (or equivalent), not in source files</li>
+<li><input type="checkbox" disabled=""> <code>.env.local</code> is in <code>.gitignore</code></li>
+<li><input type="checkbox" disabled=""> CI/CD has the environment variables set as secrets (not in the repo)</li>
+<li><input type="checkbox" disabled=""> <code>projectKey</code> is set to the specific prototype name (not <code>'default'</code>)</li>
+</ul>
+<hr>
+<h2 id="faq">FAQ</h2><p><strong>Q: Will feedback from different prototypes get mixed together?</strong><br>No. The <code>projectKey</code> you pass separates comments by project. Always set a unique value per prototype.</p>
+<p><strong>Q: Can multiple people leave feedback at the same time?</strong><br>Yes. With Firebase and Supabase backends, comments from other users appear in real time. With the AWS backend, they appear within 5 seconds (polling interval).</p>
+<p><strong>Q: How are screenshots stored? Are they secure?</strong><br>Screenshots are stored alongside comments in whichever backend is configured. With AWS, only screenshot images are publicly readable (so they can render in the browser) — all comment and reply data is private and only accessible via short-lived Cognito credentials.</p>
+<p><strong>Q: Can I use this on a prototype hosted on localhost?</strong><br>Yes for all backends. For AWS, add <code>http://localhost:3000</code> (or your local port) to the S3 CORS <code>AllowedOrigins</code> list.</p>
+<p><strong>Q: How do I remove the widget from a page?</strong><br><code>initFeedbackPlugin</code> returns a cleanup function:</p>
+<pre><code class="hljs js"><span class="hljs-keyword">const</span> cleanup = <span class="hljs-title function_">initFeedbackPlugin</span>({ ... })
+<span class="hljs-comment">// Later:</span>
+<span class="hljs-title function_">cleanup</span>() <span class="hljs-comment">// removes the widget from the DOM</span></code></pre><hr>
+<h2 id="support">Support</h2><p>For issues or questions, contact the team that owns the <code>ui-feedback-plugin</code> repository:<br><a href="https://github.com/vishmindbowser/ui-feedback-plugin">github.com/vishmindbowser/ui-feedback-plugin</a></p>
+
+  </article>
+      <script>
+      function fitMarkdownExportToContent() {
+          var article = document.querySelector('.markdown-body');
+          if (!article) return;
+
+          article.style.width = '';
+          article.style.maxWidth = '980px';
+
+          var overflow = article.scrollWidth - article.clientWidth;
+          if (overflow <= 1) return;
+
+          var styles = window.getComputedStyle(article);
+          var paddingLeft = parseFloat(styles.paddingLeft) || 0;
+          var paddingRight = parseFloat(styles.paddingRight) || 0;
+          var borderRight = parseFloat(styles.borderRightWidth) || 0;
+          var borderLeft = parseFloat(styles.borderLeftWidth) || 0;
+          var boxSizing = styles.boxSizing;
+
+          var requiredWidth = boxSizing === 'border-box'
+              ? Math.ceil(article.scrollWidth + borderLeft + borderRight)
+              : Math.ceil(article.scrollWidth - paddingLeft - paddingRight);
+
+          article.style.width = requiredWidth + 'px';
+          article.style.maxWidth = 'none';
+      }
+
+      function queueMarkdownExportFit() {
+          window.requestAnimationFrame(function () {
+              window.requestAnimationFrame(fitMarkdownExportToContent);
+          });
+      }
+
+      window.addEventListener('load', function () {
+          var mathReady = Promise.resolve();
+          var article = document.querySelector('.markdown-body');
+          if (article && window.MutationObserver) {
+              new MutationObserver(queueMarkdownExportFit).observe(article, {
+                  childList: true,
+                  subtree: true
+              });
+          }
+          if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+              mathReady = window.MathJax.typesetPromise().catch(function (err) {
+                  console.warn('MathJax typeset failed:', err);
+              });
+          }
+          if (window.mermaid) {
+              try {
+                  window.mermaid.initialize({ startOnLoad: true, theme: 'dark', gantt: { useWidth: 1200 } });
+              } catch (e) {
+                  console.warn('Mermaid initialization failed:', e);
+              }
+          }
+          if (window.ABCJS) {
+              try {
+                  var abcNodes = document.querySelectorAll('.abc-notation');
+                  abcNodes.forEach(function(node) {
+                      var code = decodeURIComponent(node.getAttribute('data-original-code') || '');
+                      if (code) {
+                          ABCJS.renderAbc(node.id, code, { responsive: 'resize' });
+                      }
+                      var container = node.closest('.abc-container');
+                      if (container) container.classList.remove('is-loading');
+                  });
+              } catch (e) {
+                  console.warn('ABCJS rendering failed:', e);
+              }
+          }
+          mathReady.finally(queueMarkdownExportFit);
+          queueMarkdownExportFit();
+      });
+      window.addEventListener('resize', queueMarkdownExportFit);
+  </script>
+</body>
+</html>
